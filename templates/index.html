@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Hello World HTMX App</title>
+  <script src="{{ url_for('static', filename='htmx.js') }}"></script>
+  <script src="{{url_for('static', filename='jquery-3.7.1.min.js')}}"></script>
+  <script src="{{ url_for('static', filename='plotly-2.34.0.min.js') }}"></script>
+  <link href="{{ url_for('static', filename='datatables.css') }}" rel="stylesheet">
+  <script src="{{ url_for('static', filename='datatables.js') }}"></script>
+  <script>
+    function rotateData(data) {
+      const keys = Object.keys(data);
+      return data[keys[0]].map((_, i) => {
+        return keys.reduce((acc, key) => {
+          acc[key] = data[key][i];
+          return acc;
+        }, {});
+      });
+    };
+  </script>
+</head>
+<body>
+ 
+  <h1>Multi-line Chart</h1>
+  <div id="my_plot"></div>
+  <script>
+    const plot_struct = {{ plot | tojson }};
+    Plotly.newPlot('my_plot', plot_struct.data, plot_struct.layout);
+  </script>
+  <h2 id="selected_plot">y=x</h2>
+  
+
+  <h1>table</h1>
+  <table id="my_table" class="display" style="width:100%"></table>
+  <script>
+    const tableData = {{ table_data | tojson }};
+    const table = document.getElementById('my_table');
+    const dataTable = new DataTable(table, {
+      data: tableData,
+      columns: [
+        { title: "X", data: "x" },
+        { title: "Y", data: "y" }
+      ]
+    });
+  </script>
+
+  <script>
+    var myPlot = document.getElementById('my_plot')
+    myPlot.on('plotly_click', function(data){
+      console.log(data);
+      let the_curve = data.points[0].data;
+      console.log(the_curve);
+      delete the_curve.mode;
+      console.log(the_curve);
+      let reformatted_data= rotateData(the_curve);
+      console.log(reformatted_data);
+      const table = $('#my_table').DataTable();
+      table.clear();
+      table.rows.add(reformatted_data);
+      table.draw();
+    });
+
+  </script>
+</body>
+<footer>
+</footer>
+</html>
