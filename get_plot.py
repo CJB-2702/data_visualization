@@ -11,15 +11,23 @@ def index():
     y1 = x1.copy()
     x2 = x1.copy()
     y2 = [x*x for x in range(10)]
+
+    #https://plotly.com/javascript/plotlyjs-function-reference/#plotlynewplot
+    #https://plotly.com/javascript/reference/
     data = [
         {"x": x1, "y": y1, "mode": "lines+markers"},
         {"x": x2, "y": y2, "mode": "lines+markers"}
     ]
-    layout = {
-        "title": "Line and Scatter Plot"
+
+    #https://plotly.com/javascript/reference/layout/
+    layout = {   
+        "margin":{"autoexpand": False, "t":0}
     }
-    plot = {"data": data, "layout": layout}
-    table_data = [{"x": x, "y": y} for x, y in zip(x1, y1)]  # Create a list of dictionaries
+    #https://plotly.com/javascript/configuration-options/
+    plot = {"data": data, "layout": layout, "config":{}}
+
+
+    table_data = [{"x": x, "y": y} for x, y in zip(x1, y1)]
     return render_template("index.html", plot=plot, table_data=table_data)
 
 if __name__ == "__main__":

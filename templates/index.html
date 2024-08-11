@@ -8,6 +8,7 @@
   <link href="{{ url_for('static', filename='datatables.css') }}" rel="stylesheet">
   <script src="{{ url_for('static', filename='datatables.js') }}"></script>
   <script>
+    //a basic helper function I use all the time, could have been included as an additional script, i just copy pasted it
     function rotateData(data) {
       const keys = Object.keys(data);
       return data[keys[0]].map((_, i) => {
@@ -21,39 +22,67 @@
 </head>
 <body>
  
-  <h1>Multi-line Chart</h1>
-  <div id="my_plot"></div>
-  <script>
-    const plot_struct = {{ plot | tojson }};
-    Plotly.newPlot('my_plot', plot_struct.data, plot_struct.layout);
-  </script>
-  <h2 id="selected_plot">y=x</h2>
-  
+  <div style="display: flex;">
+      <div 
+        style="
+          width:500px;
+          padding:20px;
+          min-width: 150px;
+          "
+      >
+        <h1>Multi-line Chart</h1>
+        <div id="my_plot" ></div>
+        <script>
+          const plot_struct = {{ plot | tojson }};
+          Plotly.newPlot('my_plot', plot_struct);//https://plotly.com/javascript/plotlyjs-function-reference/#plotlynewplot
+        </script>
+      </div>
+      
 
-  <h1>table</h1>
-  <table id="my_table" class="display" style="width:100%"></table>
-  <script>
-    const tableData = {{ table_data | tojson }};
-    const table = document.getElementById('my_table');
-    const dataTable = new DataTable(table, {
-      data: tableData,
-      columns: [
-        { title: "X", data: "x" },
-        { title: "Y", data: "y" }
-      ]
-    });
-  </script>
+      
+      <div 
+        style="
+          width:500px;
+          padding:20px;
+          min-width: 150px;
+          "
+      >
+        <h1>table</h1>
+        <table
+         id="my_table"
+         class="display"
+         style="width:100%"
+        >
+        </table>
+        <script>
+          const tableData = {{ table_data | tojson }};
+          
+          //https://datatables.net/examples/data_sources/js_array.html
+          const table = document.getElementById('my_table');
+          const dataTable = new DataTable(table, {
+            data: tableData,
+            columns: [
+              { title: "X", data: "x" },
+              { title: "Y", data: "y" }
+            ]
+          });
+        </script>
+      </div>
+  </div>
 
   <script>
+    //When clicking a plot update the table
+    //https://plotly.com/javascript/plotlyjs-events/
     var myPlot = document.getElementById('my_plot')
     myPlot.on('plotly_click', function(data){
+      //get data from clicked plot
       console.log(data);
       let the_curve = data.points[0].data;
-      console.log(the_curve);
       delete the_curve.mode;
-      console.log(the_curve);
       let reformatted_data= rotateData(the_curve);
       console.log(reformatted_data);
+
+      //update table
       const table = $('#my_table').DataTable();
       table.clear();
       table.rows.add(reformatted_data);
